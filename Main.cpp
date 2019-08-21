@@ -19,7 +19,8 @@ std::string FLAGS_json;
 
 unsigned long FLAGS_threshold_1 = 1024;
 
-unsigned long FLAGS_threshold_2 = 65536;
+//unsigned long FLAGS_threshold_2 = 65536;
+unsigned long FLAGS_threshold_2 = 4096;
 
 unsigned long FLAGS_block = 4096;
 
@@ -27,7 +28,7 @@ std::string FLAGS_delimiter = "_@_";
 
 void testPutJson(){
 	CLevel clevel;
-    std::cout << "Key: " << clevel.PutJson() << std::endl;
+    clevel.PutJson();
 }
 
 void testPutDir(){
