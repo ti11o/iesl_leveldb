@@ -17,6 +17,12 @@ std::string FLAGS_key;
 
 std::string FLAGS_json;
 
+unsigned long FLAGS_threshold = 4096;
+
+unsigned long FLAGS_chunk = 4096;
+
+std::string FLAGS_delimiter = "_@_";
+
 void testPutJson(){
 	CLevel clevel;
     std::cout << "Key: " << clevel.PutJson() << std::endl;

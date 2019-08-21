@@ -12,6 +12,12 @@ extern std::string FLAGS_key;
 
 extern std::string FLAGS_json;
 
+extern long FLAGS_threshold;
+
+extern unsigned long FLAGS_chunk;
+
+extern std::string FLAGS_delimiter;
+
 
 
 leveldb::DB* db;
@@ -47,6 +53,7 @@ std::vector<std::string> split(std::string s, std::string delim){
 std::string CLevel::PutJson(){
     std::string key = "";
     std::string value = "";
+    int size;
 
     std::ifstream f_json(FLAGS_json);
     Json::Reader reader;
@@ -57,11 +64,12 @@ std::string CLevel::PutJson(){
         std::string type = root["type"].asString();
         std::string timestamp = root["timestamp"].asString();
         value = root["content"].asString();
+        size = value.length();
 
         key.append(id);
-        key.append("_");
+        key.append(FLAGS_delimiter);
         key.append(type);
-        key.append("_");
+        key.append(FLAGS_delimiter);
         key.append(timestamp);   
 
         //std::cout << "Key: " << key << "   Value: " << value << std::endl;     
@@ -73,7 +81,27 @@ std::string CLevel::PutJson(){
         LevelDB ldb(db, wopt, ropt, batch);
         ldb.OpenDatabase(FLAGS_db.c_str());
 
-        ldb.Put(key, value); 
+
+        if(size <= FLAGS_threshold){
+            ldb.Put(key, value);
+        }else{
+            int chunk_count = 0;
+            std::ofstream f_out;
+            std::string chunk_key;
+            for(unsigned long i = 0; i < size; i += FLAGS_chunk){
+                chunk_count++;
+                chunk_key = key;
+                chunk_key.append(FLAGS_delimiter);
+                chunk_key.append(std::to_string(chunk_count));
+                std::string temp_value = value.substr(i, FLAGS_chunk);
+                ldb.Put(chunk_key, temp_value);
+                //std::cout << "\ni: " << i << "   Value: " << temp_value << std::endl;
+            }
+            f_out.open("chunk_log.txt", std::ios_base::app);
+            f_out << key << FLAGS_delimiter << FLAGS_delimiter << chunk_count << std::endl;
+            f_out.close();
+        }
+        
 
         ldb.CloseDatabase();
 
@@ -157,7 +185,33 @@ std::string CLevel::Get(std::string key){
     LevelDB ldb(db, wopt, ropt, batch);
     ldb.OpenDatabase(FLAGS_db.c_str());
 
-    std::string value = ldb.Get(key);
+    bool chunked = false;
+    std::string value = "", line, l_key, chunk_key;
+    int chunk_count;
+    std::ifstream f_chunk_log("chunk_log.txt");
+    std::vector<std::string> keys;
+
+    while(std::getline(f_chunk_log, line)){
+        keys = split(line, FLAGS_delimiter + FLAGS_delimiter);
+        l_key = keys.at(0);
+        if(l_key.compare(key) == 0){
+            //std::cout<<"point!"<<std::endl;
+            chunked = true;
+            chunk_count = std::stoi(keys.at(1));
+            for(int i = 1; i <= chunk_count; i++){
+                chunk_key = key;
+                chunk_key.append(FLAGS_delimiter);
+                chunk_key.append(std::to_string(i));
+                //std::cout<<"chunk_key: " << chunk_key<<std::endl;
+                value.append(ldb.Get(chunk_key));
+            }
+        }
+    }
+
+    if(!chunked){
+        //std::cout<<"point 2!"<<std::endl;
+        value = ldb.Get(key);
+    }
 
     //std::ofstream f_out ("read/file_1.jpg", std::ofstream::binary);
     //unsigned int size = value.size();
@@ -166,7 +220,7 @@ std::string CLevel::Get(std::string key){
     if(!value.empty()){
 	//f_out.write(reinterpret_cast<char *>(&size), sizeof(size) );
 	//f_out.write(value.c_str(), value.size());
-        std::vector<std::string> keys = split(key, "_");
+        std::vector<std::string> keys = split(key, FLAGS_delimiter);
         std::ofstream f_out("data_out.json");
         Json::Value root;
         root["id"] = keys.at(0);
@@ -180,7 +234,7 @@ std::string CLevel::Get(std::string key){
     }	
    // f_out.close();
 
-    return ldb.Get(key);
+    return "ok";
 }
 
 void CLevel::Delete(std::string key){}

@@ -26,6 +26,7 @@ class LevelDB{
 	void OpenDatabase(const char *path);
 	void CloseDatabase();
 	void Put(std::string key, std::string value);
+	leveldb::Iterator* NewIerator();
 	std::string Get(std::string key);
 	void Delete(std::string key);
 };

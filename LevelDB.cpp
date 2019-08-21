@@ -30,16 +30,20 @@ std::string LevelDB::Get(std::string key){
     std::string value;
     leveldb::Status s = ldb->Get(leveldb::ReadOptions(), key, &value);
     if(s.ok()){
-	return value;
+	    return value;
 	//cout << key << " => " << value << endl;
     }else{
-	std::cout << "failed: " << s.ToString() << " " << key << std::endl;
-	return NULL;
+	    std::cout << "failed: " << s.ToString() << " " << key << std::endl;
+	    return "";
     }
 }
 
-void LevelDB::Delete(std::string key){
+leveldb::Iterator* LevelDB::NewIerator(){
+    return ldb->NewIterator(leveldb::ReadOptions());
+}
 
+void LevelDB::Delete(std::string key){
+    assert(ldb->Delete(wopt, key).ok());
 }
 
 
