@@ -183,4 +183,58 @@ std::string CLevel::Get(std::string key){
     return ldb.Get(key);
 }
 
+void CLevel::Getall(){
+    std::cout<<"Data will be retreived from " << FLAGS_db << std::endl;
+    //print out the database path.
+
+    std::ofstream f_log;
+    f_log.open("log.txt", std::ios_base::app);
+    //create a log file to make sure.
+
+    leveldb::DB* db;
+    leveldb::WriteOptions wopt;
+    leveldb::ReadOptions ropt;
+    leveldb::WriteBatch batch;
+    LevelDB ldb(db, wopt, ropt, batch);
+    ldb.OpenDatabase(FLAGS_db.c_str());
+    //open a leveldb.
+
+    DIR *dr;
+    struct dirent *de;
+    //open *dr and *de for file output.
+
+    std::string f_file;
+    std::string f_filename;
+    std::ifstream f_o;
+    std::ofstream f_out;
+
+
+    dr = opendir(FLAGS_db.c_str());
+    std::cout << "Starting iteration..." << std::endl;
+    if(dr==NULL){
+        std::cout << "Could not open the directory folder" << std::endl;
+    }//if db path is uncorrect, print an error message
+
+    leveldb::Iterator* it = db->NewIterator(ropt);
+
+    std::cout << "Start Iteration" << std::endl;
+    
+    for(it->SeekToFirst(); it->Valid();it->Next()){
+        std::cout <<it->key().ToString() << std::endl;
+        //(it->value().ToString()) >> folder
+
+        f_filename = it->key().ToString();
+        f_file = "";
+        f_file.append(it->value().ToString());
+        f_o.open(f_file);
+        std::string ov((std::istreambuf_iterator<char>(f_o) ), (std::istreambuf_iterator<char>()) );
+        f_out.open(f_filename + ".jpg", std::ios_base::app);
+        f_out << ov;
+        f_log << "File " << it->key().ToString() << " is retrieved" << std::endl;
+        f_o.close();
+        f_out.close();
+    }
+    
+    f_log.close();
+}
 void CLevel::Delete(std::string key){}
