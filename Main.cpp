@@ -17,9 +17,11 @@ std::string FLAGS_key;
 
 std::string FLAGS_json;
 
-unsigned long FLAGS_threshold = 4096;
+unsigned long FLAGS_threshold_1 = 1024;
 
-unsigned long FLAGS_chunk = 4096;
+unsigned long FLAGS_threshold_2 = 65536;
+
+unsigned long FLAGS_block = 4096;
 
 std::string FLAGS_delimiter = "_@_";
 

@@ -12,9 +12,11 @@ extern std::string FLAGS_key;
 
 extern std::string FLAGS_json;
 
-extern long FLAGS_threshold;
+extern unsigned long FLAGS_threshold_1;
 
-extern unsigned long FLAGS_chunk;
+extern unsigned long FLAGS_threshold_2;
+
+extern unsigned long FLAGS_block;
 
 extern std::string FLAGS_delimiter;
 
@@ -82,27 +84,32 @@ std::string CLevel::PutJson(){
         ldb.OpenDatabase(FLAGS_db.c_str());
 
 
-        if(size <= FLAGS_threshold){
+        if(size <= FLAGS_threshold_1){ //merging
             ldb.Put(key, value);
-        }else{
+            std::cout << "Key: " << key << "; Size: " << size << "; Merged;" << std::endl;
+
+        }else if(size <= FLAGS_threshold_2){ //inserting as it is
+            ldb.Put(key, value);
+            std::cout << "Key: " << key << "; Size: " << size << "; Inserted;" << std::endl;
+
+        }else{ //chunking
             int chunk_count = 0;
             std::ofstream f_out;
             std::string chunk_key;
-            for(unsigned long i = 0; i < size; i += FLAGS_chunk){
+            for(unsigned long i = 0; i < size; i += FLAGS_block){
                 chunk_count++;
                 chunk_key = key;
                 chunk_key.append(FLAGS_delimiter);
                 chunk_key.append(std::to_string(chunk_count));
-                std::string temp_value = value.substr(i, FLAGS_chunk);
+                std::string temp_value = value.substr(i, FLAGS_block);
                 ldb.Put(chunk_key, temp_value);
                 //std::cout << "\ni: " << i << "   Value: " << temp_value << std::endl;
             }
             f_out.open("chunk_log.txt", std::ios_base::app);
             f_out << key << FLAGS_delimiter << FLAGS_delimiter << chunk_count << std::endl;
             f_out.close();
+            std::cout << "Key: " << key << "; Size: " << size << "; Chunked into " << chunk_count << ";" << std::endl;
         }
-        
-
         ldb.CloseDatabase();
 
     }
