@@ -259,7 +259,6 @@ void CLevel::Getall(){
 
     std::string f_file;
     std::string f_filename;
-    std::ifstream f_o;
     std::ofstream f_out;
 
 
@@ -280,12 +279,20 @@ void CLevel::Getall(){
         f_filename = it->key().ToString();
         f_file = "";
         f_file.append(it->value().ToString());
-        f_o.open(f_file);
-        std::string ov((std::istreambuf_iterator<char>(f_o) ), (std::istreambuf_iterator<char>()) );
-        f_out.open(f_filename + ".jpg", std::ios_base::app);
-        f_out << ov;
+
+        std::ofstream f_out (FLAGS_dir + f_filename + ".jpg", std::ofstream::binary);
+        unsigned int size = f_file.size();
+        std::cout<<"Size: " << size << std::endl;
+        //f_out.write(reinterpret_cast<char *>(&size), sizeof(size) );
+	    f_out.write(f_file.c_str(), f_file.size());
+
+
+
+        //f_o.open(f_file);
+        //std::string ov((std::istreambuf_iterator<char>(f_o) ), (std::istreambuf_iterator<char>()) );
+        //f_out.open(FLAGS_dir + f_filename + ".jpg");
+        //f_out << it->value().ToString();
         f_log << "File " << it->key().ToString() << " is retrieved" << std::endl;
-        f_o.close();
         f_out.close();
     }
     
