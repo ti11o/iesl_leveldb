@@ -19,6 +19,7 @@ class CLevel{
 	std::string PutJson();
 	unsigned long PutDir();
 	std::string Get(std::string Key);
+	void Getall();
 	void Delete(std::string key);
 };
 

@@ -49,8 +49,8 @@ void testPutDir(){
 }
 
 void testGetAll(){
-    //CLevel clevel;
-    //clevel.Get(key);
+    CLevel clevel;
+    clevel.Getall();
 }
 
 void testGetOne(){

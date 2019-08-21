@@ -23,6 +23,7 @@ class LevelDB{
     public:
 	LevelDB();
 	LevelDB(leveldb::DB *db, leveldb::WriteOptions wop, leveldb::ReadOptions rop, leveldb::WriteBatch b);
+	//FIXME - iterator should be added
 	void OpenDatabase(const char *path);
 	void CloseDatabase();
 	void Put(std::string key, std::string value);
