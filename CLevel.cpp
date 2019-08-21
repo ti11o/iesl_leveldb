@@ -269,7 +269,7 @@ void CLevel::Getall(){
         std::cout << "Could not open the directory folder" << std::endl;
     }//if db path is uncorrect, print an error message
 
-    leveldb::Iterator* it = db->NewIterator(ropt);
+    leveldb::Iterator* it = ldb.NewIterator();
 
     std::cout << "Start Iteration" << std::endl;
     

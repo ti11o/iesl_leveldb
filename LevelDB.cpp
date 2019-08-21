@@ -38,7 +38,7 @@ std::string LevelDB::Get(std::string key){
     }
 }
 
-leveldb::Iterator* LevelDB::NewIerator(){
+leveldb::Iterator* LevelDB::NewIterator(){
     return ldb->NewIterator(leveldb::ReadOptions());
 }
 
